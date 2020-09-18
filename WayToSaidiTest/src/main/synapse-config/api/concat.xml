@@ -1,0 +1,313 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<api context="/concat" name="concat" xmlns="http://ws.apache.org/ns/synapse">
+    <resource methods="GET" url-mapping="/concatenare">
+        <inSequence>
+            <!-- **************************************************************************************************** -->
+            <!-- PRIMA CHIAMATA -->
+            <!-- METTO NELLA PROPERTY Nome CHE e L ARRAY UTENTI CHE RECUPERIAMO DAL 
+				JSON DEL SERVIZIO -->
+            <call>
+                <endpoint>
+                    <http method="get" uri-template="http://localhost:9092/utente/getUtenti">
+                        <suspendOnFailure>
+                            <initialDuration>-1</initialDuration>
+                            <progressionFactor>1</progressionFactor>
+                        </suspendOnFailure>
+                        <markForSuspension>
+                            <retriesBeforeSuspension>0</retriesBeforeSuspension>
+                        </markForSuspension>
+                    </http>
+                </endpoint>
+            </call>
+            <enrich>
+                <source clone="false" type="body"/>
+                <target property="first-json" type="property"/>
+            </enrich>
+            <!-- <log level="custom"> <property expression="json-eval($.utenti[0].email)" 
+				name="GET MAIL ********"/> </log> -->
+            <!-- METTO NELLA PROPERTY array L ARRAY UTENTI CHE LO RECUPERIAMO DALLA 
+				RESPONSE DEL SERVIZIO -->
+            <property expression="json-eval($.utenti)" name="array" scope="default" type="STRING"/>
+            <!-- SCRIVO NEI LOG LA PROPERTY array -->
+            <log level="custom">
+                <property expression="get-property('array')" name="******** ARRAY UTENTI DEL PRIMO SERVIZIO ********"/>
+            </log>
+            <!-- CICLO PER OGNI ELEMENTO DELL ARRAY UTENTI CHE RECUPERIAMO DAL JSON 
+				RESPONSE DEL SERVIZIO -->
+            <foreach expression="//utenti" id="foreach_1">
+                <sequence>
+                    <property expression="//utenti/nome" name="Nome" scope="default" type="STRING"/>
+                    <log level="custom">
+                        <property expression="get-property('Nome')" name="******** NOME UTENTI ********"/>
+                        <!-- SCRIVO NEI LOG LA PROPERTY NOME PER L UTENTE CORRENTE -->
+                    </log>
+                </sequence>
+            </foreach>
+            <!-- PRIMA CHIAMATA 2:28:40 -->
+            <!-- **************************************************************************************************** -->
+            <!-- **************************************************************************************************** -->
+            <!-- SECONDA CHIAMATA -->
+            <call>
+                <endpoint>
+                    <http method="get" uri-template="http://localhost:9092/tipoCertificazione/getAllProgetti">
+                        <suspendOnFailure>
+                            <initialDuration>-1</initialDuration>
+                            <progressionFactor>1</progressionFactor>
+                        </suspendOnFailure>
+                        <markForSuspension>
+                            <retriesBeforeSuspension>0</retriesBeforeSuspension>
+                        </markForSuspension>
+                    </http>
+                </endpoint>
+            </call>
+            <log level="custom">
+                <property expression="get-property('first-json')" name="******** JSON DEL PRIMO SERVIZIO DOPO AVER CHIAMATA IL SECONDO SERVIZIO ********"/>
+            </log>
+            <!-- FOR EACH CON JSONARRAY E JSONELEMENT -->
+            <foreach expression="//jsonArray/jsonElement" id="foreach_3">
+                <sequence>
+                    <log level="custom">
+                        <property name="JsonArray" value="TEST"/>
+                    </log>
+                </sequence>
+            </foreach>
+            <log level="custom">
+                <property expression="//jsonArray/jsonElement" name="******** EXPRESSION jsonArray/jsonElement ********"/>
+            </log>
+            <enrich>
+                <source clone="false" type="body"/>
+                <target property="second-json" type="property"/>
+            </enrich>
+            <!-- SECONDA CHIAMATA -->
+            <!-- **************************************************************************************************** -->
+            <!-- COSTRUISCO IL NUOVO JSON PASSANDO COME PARAMETRI IL PRIMO JSON SALVATO 
+				COME first-json e il secondo come second-json -->
+            <payloadFactory media-type="json">
+                <format>
+
+					{
+					"completeJson" : {
+					"firstjson" : $1,
+					"secondjson" : $2
+					}}
+
+				</format>
+                <args>
+                    <arg evaluator="xml" expression="get-property('first-json')"/>
+                    <arg evaluator="xml" expression="get-property('second-json')"/>
+                </args>
+            </payloadFactory>
+            <property name="messageType" scope="axis2" type="STRING" value="application/json"/>
+            <send/>
+        </inSequence>
+        <outSequence/>
+        <faultSequence/>
+    </resource>
+    <resource methods="GET" url-mapping="/concatenareVersione2">
+        <inSequence>
+            <!-- **************************************************************************************************** -->
+            <!-- PRIMA CHIAMATA -->
+            <!-- METTO NELLA PROPERTY Nome CHE e L ARRAY UTENTI CHE RECUPERIAMO DAL 
+				JSON DEL SERVIZIO -->
+            <call>
+                <endpoint>
+                    <http method="get" uri-template="http://localhost:9092/tipoCertificazione/getAllProgetti">
+                        <suspendOnFailure>
+                            <initialDuration>-1</initialDuration>
+                            <progressionFactor>1</progressionFactor>
+                        </suspendOnFailure>
+                        <markForSuspension>
+                            <retriesBeforeSuspension>0</retriesBeforeSuspension>
+                        </markForSuspension>
+                    </http>
+                </endpoint>
+            </call>
+            <enrich>
+                <source clone="false" type="body"/>
+                <target property="first-json" type="property"/>
+            </enrich>
+            <!-- <log level="custom"> <property expression="json-eval($.utenti[0].email)" 
+				name="GET MAIL ********"/> </log> -->
+            <property expression="json-eval($)" name="dai" scope="default" type="STRING"/>
+            <!-- METTO NELLA PROPERTY array L ARRAY UTENTI CHE LO RECUPERIAMO DALLA 
+				RESPONSE DEL SERVIZIO -->
+            <property expression="json-eval($.utenti)" name="array" scope="default" type="STRING"/>
+            <!-- SCRIVO NEI LOG LA PROPERTY array <log level="custom"> <property expression="get-property('array')" 
+				name="******** ARRAY UTENTI DEL PRIMO SERVIZIO ********"/> </log> -->
+            <!-- CICLO PER OGNI ELEMENTO DELL ARRAY UTENTI CHE RECUPERIAMO DAL JSON 
+				RESPONSE DEL SERVIZIO <foreach expression="//utenti" id="foreach_1"> <sequence> 
+				<property expression="//utenti/nome" name="Nome" scope="default" type="STRING"/> 
+				<log level="custom"> <property expression="get-property('Nome')" name="******** 
+				NOME UTENTI ********"/> </log> </sequence> </foreach> -->
+            <!-- PRIMA CHIAMATA -->
+            <!-- **************************************************************************************************** -->
+            <!-- **************************************************************************************************** -->
+            <!-- COSTRUISCO IL NUOVO JSON PASSANDO COME PARAMETRI IL PRIMO JSON SALVATO 
+				COME first-json e il secondo come second-json <foreach expression="//utenti" 
+				id="foreach_9"> <sequence> <property expression="//utenti/nome" name="nomeUtente" 
+				scope="default" type="STRING"/> <log level="custom"> <property expression="get-property('nomeUtente')" 
+				name="NOME UTENTE"/> </log> <payloadFactory media-type="json"> <format> { 
+				"Response" : { "Utenti" : [ "Nome" : $1 ] } } </format> <args> <arg evaluator="xml" 
+				expression="//utenti/nome" />/> </args> </payloadFactory> </sequence> </foreach> -->
+            <script language="js"><![CDATA[//https://docs.wso2.com/display/ESB481/Script+Mediator
+            							var cars = ["Saab", "Volvo", "BMW"];
+            							var pluto = mc.getProperty("dai");
+            							var json = JSON.parse(pluto);
+            							var log = mc.getServiceLog();
+            							var pippo = 'pippoooooo';
+            							log.info ("***********" + pippo + " " +cars + " " + cars.length);
+            							log.info ("***********" + " " + json[0].descrizioneProgetto + " " + json.length);
+            							
+            							//var response = {
+            									//progetti : []
+            							//}
+            							
+            							var progetti = []
+            							
+            							for (var i = 0; i<json.length; i++){
+            								progetti.push(json[i]);
+            								log.info ("FOR " + json[i].idProgetto + " " + json[i].descrizioneProgetto);
+            							
+            							}
+            							
+            							var responseJson = JSON.stringify( progetti );
+            							
+            							mc.setProperty("key", responseJson);
+										mc.setPayloadJSON(json);
+            							log.info ("***********" + " " + responseJson);]]></script>
+            <log level="custom">
+                <property expression="get-property('key')" name="/////////////////////"/>
+            </log>
+            <payloadFactory media-type="json">
+                <format>
+
+					{
+					"response" : $1}
+
+				</format>
+                <args>
+                    <arg evaluator="xml" expression="get-property('key')"/>
+                </args>
+            </payloadFactory>
+            <property name="messageType" scope="axis2" type="STRING" value="application/json"/>
+            <send/>
+        </inSequence>
+        <outSequence/>
+        <faultSequence/>
+    </resource>
+    <resource methods="GET" url-mapping="/concatenareVersione3">
+        <inSequence>
+            <call>
+                <endpoint>
+                    <http method="get" uri-template="http://localhost:9092/utente/getUtenti">
+                        <suspendOnFailure>
+                            <initialDuration>-1</initialDuration>
+                            <progressionFactor>1</progressionFactor>
+                        </suspendOnFailure>
+                        <markForSuspension>
+                            <retriesBeforeSuspension>0</retriesBeforeSuspension>
+                        </markForSuspension>
+                    </http>
+                </endpoint>
+            </call>
+            <enrich>
+                <source clone="false" type="body"/>
+                <target property="first-json" type="property"/>
+            </enrich>
+            <property expression="json-eval($.utenti)" name="utenti" scope="default" type="STRING"/>
+            <log level="custom">
+                <property expression="get-property('first-json')" name="******** ARRAY UTENTI DEL PRIMO SERVIZIO ********"/>
+            </log>
+            <!-- **************************************************************************************** -->
+            <call>
+                <endpoint>
+                    <http method="get" uri-template="http://localhost:9092/tipoCertificazione/getAllProgetti">
+                        <suspendOnFailure>
+                            <initialDuration>-1</initialDuration>
+                            <progressionFactor>1</progressionFactor>
+                        </suspendOnFailure>
+                        <markForSuspension>
+                            <retriesBeforeSuspension>0</retriesBeforeSuspension>
+                        </markForSuspension>
+                    </http>
+                </endpoint>
+            </call>
+            <enrich>
+                <source clone="false" type="body"/>
+                <target property="second-json" type="property"/>
+            </enrich>
+            <property expression="json-eval($)" name="progetti" scope="default" type="STRING"/>
+            <log level="custom">
+                <property expression="get-property('second-json')" name="******** ARRAY UTENTI DEL SECONDO SERVIZIO ********"/>
+            </log>
+            <!-- **************************************************************************************** -->
+            <script language="js"><![CDATA[//https://docs.wso2.com/display/ESB481/Script+Mediator
+            							
+            							var log = mc.getServiceLog();
+            							
+            							var utenti = JSON.parse(mc.getProperty("utenti"));
+            							var progetti = JSON.parse(mc.getProperty("progetti"));
+										
+										log.info('utenti' + ' ' + utenti + ' ' + utenti.length);
+										log.info('progetti' + ' ' + progetti );            							
+            							
+            							var response = [];
+            							var nomeVariable = '';
+									    var progettiVarible = [];
+									
+            							//ciclo l array con i progetti
+            								
+            								for (var j = 0; j<utenti.length; j++){
+            								
+            								  var element = {
+									            nome : '',
+									            progetti : []
+									            };
+									         
+            								
+	            								nomeVariable = utenti[j].nome;
+	            								progettiVariable = [];
+	            							   var appoggio =  utenti[j].progetti;
+	            							   
+	            								for (var k = 0; k<appoggio.length; k++){
+	            									for (var i = 0; i<progetti.length; i++){  
+										
+										                  if (progetti[i].descrizioneProgetto === appoggio[k].descrizioneProgetto){
+										                     progettiVariable.push(progetti[i].descrizioneProgetto);
+										                  }
+										               }
+	            											     
+	            								}  
+	            								
+            								   element.nome = nomeVariable;
+            								   element.progetti.push(progettiVariable);
+            								   log.info('element ' + JSON.stringify( element ));
+            								   response.push (element);
+            								}
+            								
+            							var responseJson = JSON.stringify( response );
+            							mc.setProperty("key", responseJson);
+            					        log.info('Length element ' + response.length);
+            					        log.info('Length element ' + response);]]></script>
+            <!-- <log level="custom"> <property expression="get-property('key')" name="/////////////////////"/> 
+				</log> -->
+            <payloadFactory media-type="json">
+                <format>
+
+					{
+					"response" : $1
+					}
+
+				</format>
+                <args>
+                    <arg evaluator="xml" expression="get-property('key')"/>
+                </args>
+            </payloadFactory>
+            <property name="messageType" scope="axis2" type="STRING" value="application/json"/>
+            <send/>
+        </inSequence>
+        <outSequence/>
+        <faultSequence/>
+    </resource>
+    <!-- SECONDA CHIAMATA A UN ALTRA RESOURCE -->
+</api>

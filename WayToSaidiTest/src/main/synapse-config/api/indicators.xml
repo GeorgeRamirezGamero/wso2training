@@ -1,0 +1,494 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<api context="/kpi-management/indicators" name="kpi-management" xmlns="http://ws.apache.org/ns/synapse">
+    <resource methods="GET" uri-template="/{globalOrLocalKpi}/{mtdOrYtd}/{service}?beginDate={inizioData}&amp;endDate={fineData}">
+        <inSequence>
+            <log level="custom">
+                <property name="message" value="Business Service Way2Saidi"/>
+                <property expression="get-property('uri.var.globalOrLocalKpi')" name="********** Global/Local ************"/>
+                <property expression="get-property('uri.var.mtdOrYtd')" name="********** Mtd/Ytd ************"/>
+                <property expression="get-property('uri.var.service')" name="********** Service ************"/>
+                <property expression="get-property('uri.var.inizioData')" name="********** InizioData ************"/>
+                <property expression="get-property('uri.var.fineData')" name="********** FineData ************"/>
+            </log>
+            <property expression="get-property('uri.var.globalOrLocalKpi')" name="uriGlobalOrLocalKpi" scope="default" type="STRING"/>
+            <property expression="get-property('uri.var.mtdOrYtd')" name="uriMtdOrYtd" scope="default" type="STRING"/>
+            <property expression="get-property('uri.var.service')" name="uriService" scope="default" type="STRING"/>
+            <property expression="get-property('uri.var.inizioData')" name="uriInizioData" scope="default" type="STRING"/>
+            <property expression="get-property('uri.var.fineData')" name="uriFineData" scope="default" type="STRING"/>
+            <property name="serviceUrl" scope="default" type="STRING" value="http://internal-afa7d8031edd011ea907606218de8e2b-1018256878.eu-central-1.elb.amazonaws.com/kpi-management/indicators"/>
+            <switch source="get-property('uriGlobalOrLocalKpi')">
+                <case regex="GLOBAL_KPI">
+                    <log level="custom">
+                        <property name="**********************" value="GLOBAL"/>
+                    </log>
+                    <switch source="get-property('uriMtdOrYtd')">
+                        <case regex="YTD">
+                            <log level="custom">
+                                <property name="********************** " value="YTD"/>
+                                <property name="********************** " value="http://internal-afa7d8031edd011ea907606218de8e2b-1018256878.eu-central-1.elb.amazonaws.com/kpi-management/indicators/GLOBAL_KPI/YTD/G?"/>
+                            </log>
+                            <call>
+                                <endpoint>
+                                    <http method="get" uri-template="http://internal-afa7d8031edd011ea907606218de8e2b-1018256878.eu-central-1.elb.amazonaws.com/kpi-management/indicators/GLOBAL_KPI/YTD/G?beginDate={uri.var.inizioData}&amp;endDate={uri.var.fineData}">
+                                        <suspendOnFailure>
+                                            <initialDuration>-1</initialDuration>
+                                            <progressionFactor>1</progressionFactor>
+                                        </suspendOnFailure>
+                                        <markForSuspension>
+                                            <retriesBeforeSuspension>0</retriesBeforeSuspension>
+                                        </markForSuspension>
+                                    </http>
+                                </endpoint>
+                            </call>
+                            <filter regex="200" source="get-property('axis2', 'HTTP_SC')">
+                                <then>
+                                    <log level="custom">
+                                        <property name="switchlog" value="Call successful"/>
+                                    </log>
+                                    <respond/>
+                                </then>
+                                <else>
+                                    <log level="custom">
+                                        <property name="switchlog" value="Case: second call unsuccessful"/>
+                                    </log>
+                                    <property name="HTTP_SC" scope="axis2" type="STRING" value="500"/>
+                                    <payloadFactory media-type="json">
+                                        <format>
+											{
+											"error" : "Internal Business Service Error",
+											"errorProperty" :
+											{
+											"errorCode": "500",
+											"errorMessage": "",
+											"errorDetail": "Error after call External Microservice",
+											"errorException": ""
+											}
+											}										
+										</format>
+                                        <args/>
+                                    </payloadFactory>
+                                    <respond/>
+                                </else>
+                            </filter>
+                            <!-- <send/> -->
+                        </case>
+                        <default>
+                            <log level="custom">
+                                <property name="********************** " value="MTD"/>
+                            </log>
+                            <switch source="get-property('uriService')">
+                                <case regex="G">
+                                    <log level="custom">
+                                        <property name="********************** " value="G"/>
+                                        <property name="********************** " value="http://internal-afa7d8031edd011ea907606218de8e2b-1018256878.eu-central-1.elb.amazonaws.com/kpi-management/indicators/GLOBAL_KPI/MTD/G?"/>
+                                    </log>
+                                    <call>
+                                        <endpoint>
+                                            <http method="get" uri-template="http://internal-afa7d8031edd011ea907606218de8e2b-1018256878.eu-central-1.elb.amazonaws.com/kpi-management/indicators/GLOBAL_KPI/MTD/G?beginDate={uri.var.inizioData}&amp;endDate={uri.var.fineData}">
+                                                <suspendOnFailure>
+                                                    <initialDuration>-1</initialDuration>
+                                                    <progressionFactor>1</progressionFactor>
+                                                </suspendOnFailure>
+                                                <markForSuspension>
+                                                    <retriesBeforeSuspension>0</retriesBeforeSuspension>
+                                                </markForSuspension>
+                                            </http>
+                                        </endpoint>
+                                    </call>
+                                    <filter regex="200" source="get-property('axis2', 'HTTP_SC')">
+                                        <then>
+                                            <log level="custom">
+                                                <property name="switchlog" value="Call successful"/>
+                                            </log>
+                                            <respond/>
+                                        </then>
+                                        <else>
+                                            <log level="custom">
+                                                <property name="switchlog" value="Case: second call unsuccessful"/>
+                                            </log>
+                                            <property name="HTTP_SC" scope="axis2" type="STRING" value="500"/>
+                                            <payloadFactory media-type="json">
+                                                <format>
+												{
+												"error" : "Internal Business Service Error",
+												"errorProperty" :
+												{
+												"errorCode": "500",
+												"errorMessage": "",
+												"errorDetail": "Error after call External Microservice",
+												"errorException": ""
+												}
+												}												
+												</format>
+                                                <args/>
+                                            </payloadFactory>
+                                            <respond/>
+                                        </else>
+                                    </filter>
+                                    <send/>
+                                </case>
+                                <case regex="RxPxMxA">
+                                    <log level="custom">
+                                        <property name="********************** " value="RxPxMxA"/>
+                                        <property name="********************** " value="http://internal-afa7d8031edd011ea907606218de8e2b-1018256878.eu-central-1.elb.amazonaws.com/kpi-management/indicators/GLOBAL_KPI/MTD/RxPxMxA?"/>
+                                    </log>
+                                    <call>
+                                        <endpoint>
+                                            <http method="get" uri-template="http://internal-afa7d8031edd011ea907606218de8e2b-1018256878.eu-central-1.elb.amazonaws.com/kpi-management/indicators/GLOBAL_KPI/MTD/RxPxMxA?beginDate={uri.var.inizioData}&amp;endDate={uri.var.fineData}">
+                                                <suspendOnFailure>
+                                                    <initialDuration>-1</initialDuration>
+                                                    <progressionFactor>1</progressionFactor>
+                                                </suspendOnFailure>
+                                                <markForSuspension>
+                                                    <retriesBeforeSuspension>0</retriesBeforeSuspension>
+                                                </markForSuspension>
+                                            </http>
+                                        </endpoint>
+                                    </call>
+                                    <filter regex="200" source="get-property('axis2', 'HTTP_SC')">
+                                        <then>
+                                            <log level="custom">
+                                                <property name="switchlog" value="Call successful"/>
+                                            </log>
+                                            <respond/>
+                                        </then>
+                                        <else>
+                                            <log level="custom">
+                                                <property name="switchlog" value="Case: second call unsuccessful"/>
+                                            </log>
+                                            <property name="HTTP_SC" scope="axis2" type="STRING" value="500"/>
+                                            <payloadFactory media-type="json">
+                                                <format>
+												{
+												"error" : "Internal Business Service Error",
+												"errorProperty" :
+												{
+												"errorCode": "500",
+												"errorMessage": "",
+												"errorDetail": "Error after call External Microservice",
+												"errorException": ""
+												}
+												}												
+										</format>
+                                                <args/>
+                                            </payloadFactory>
+                                            <respond/>
+                                        </else>
+                                    </filter>
+                                    <send/>
+                                </case>
+                                <default>
+                                    <log level="custom">
+                                        <property name="********************** " value="DxZxUxA"/>
+                                        <property name="********************** " value="http://internal-afa7d8031edd011ea907606218de8e2b-1018256878.eu-central-1.elb.amazonaws.com/kpi-management/indicators/GLOBAL_KPI/MTD/DxZxUxA?"/>
+                                    </log>
+                                    <call>
+                                        <endpoint>
+                                            <http method="get" uri-template="http://internal-afa7d8031edd011ea907606218de8e2b-1018256878.eu-central-1.elb.amazonaws.com/kpi-management/indicators/GLOBAL_KPI/MTD/DxZxUxA?beginDate={uri.var.inizioData}&amp;endDate={uri.var.fineData}">
+                                                <suspendOnFailure>
+                                                    <initialDuration>-1</initialDuration>
+                                                    <progressionFactor>1</progressionFactor>
+                                                </suspendOnFailure>
+                                                <markForSuspension>
+                                                    <retriesBeforeSuspension>0</retriesBeforeSuspension>
+                                                </markForSuspension>
+                                            </http>
+                                        </endpoint>
+                                    </call>
+                                    <filter regex="200" source="get-property('axis2', 'HTTP_SC')">
+                                        <then>
+                                            <log level="custom">
+                                                <property name="switchlog" value="Call successful"/>
+                                            </log>
+                                            <respond/>
+                                        </then>
+                                        <else>
+                                            <log level="custom">
+                                                <property name="switchlog" value="Case: second call unsuccessful"/>
+                                            </log>
+                                            <property name="HTTP_SC" scope="axis2" type="STRING" value="500"/>
+                                            <payloadFactory media-type="json">
+                                                <format>
+													{
+													"error" : "Internal Business Service Error",
+													"errorProperty" :
+													{
+													"errorCode": "500",
+													"errorMessage": "",
+													"errorDetail": "Error after call External Microservice",
+													"errorException": ""
+													}
+													}												
+												</format>
+                                                <args/>
+                                            </payloadFactory>
+                                            <respond/>
+                                        </else>
+                                    </filter>
+                                    <send/>
+                                </default>
+                            </switch>
+                        </default>
+                    </switch>
+                </case>
+                <default>
+                    <log level="custom">
+                        <property name="********** FineData ************" value="LOCAL DEFAULT"/>
+                    </log>
+                    <switch source="get-property('uriService')">
+                        <case regex="RxPxMxA">
+                            <log level="custom">
+                                <property name="********************** " value="RxPxMxA"/>
+                                <property name="********************** " value="http://internal-afa7d8031edd011ea907606218de8e2b-1018256878.eu-central-1.elb.amazonaws.com/kpi-management/indicators/LOCAL_KPI/MTD/RxPxMxA?"/>
+                            </log>
+                            <call>
+                                <endpoint>
+                                    <http method="get" uri-template="http://internal-afa7d8031edd011ea907606218de8e2b-1018256878.eu-central-1.elb.amazonaws.com/kpi-management/indicators/LOCAL_KPI/MTD/RxPxMxA?beginDate={uri.var.inizioData}&amp;endDate={uri.var.fineData}">
+                                        <suspendOnFailure>
+                                            <initialDuration>-1</initialDuration>
+                                            <progressionFactor>1</progressionFactor>
+                                        </suspendOnFailure>
+                                        <markForSuspension>
+                                            <retriesBeforeSuspension>0</retriesBeforeSuspension>
+                                        </markForSuspension>
+                                    </http>
+                                </endpoint>
+                            </call>
+                            <filter regex="200" source="get-property('axis2', 'HTTP_SC')">
+                                <then>
+                                    <log level="custom">
+                                        <property name="switchlog" value="Call successful"/>
+                                    </log>
+                                    <respond/>
+                                </then>
+                                <else>
+                                    <log level="custom">
+                                        <property name="switchlog" value="Case: second call unsuccessful"/>
+                                    </log>
+                                    <property name="HTTP_SC" scope="axis2" type="STRING" value="500"/>
+                                    <payloadFactory media-type="json">
+                                        <format>
+										{
+										"error" : "Internal Business Service Error",
+										"errorProperty" :
+										{
+										"errorCode": "500",
+										"errorMessage": "",
+										"errorDetail": "Error after call External Microservice",
+										"errorException": ""
+										}
+										}										
+										</format>
+                                        <args/>
+                                    </payloadFactory>
+                                    <respond/>
+                                </else>
+                            </filter>
+                            <send/>
+                        </case>
+                        <default>
+                            <log level="custom">
+                                <property name="********************** " value="DxZxUxA"/>
+                                <property name="********************** " value="http://internal-afa7d8031edd011ea907606218de8e2b-1018256878.eu-central-1.elb.amazonaws.com/kpi-management/indicators/LOCAL_KPI/MTD/DxZxUxA?"/>
+                            </log>
+                            <call>
+                                <endpoint>
+                                    <http method="get" uri-template="http://internal-afa7d8031edd011ea907606218de8e2b-1018256878.eu-central-1.elb.amazonaws.com/kpi-management/indicators/LOCAL_KPI/MTD/DxZxUxA?beginDate={uri.var.inizioData}&amp;endDate={uri.var.fineData}">
+                                        <suspendOnFailure>
+                                            <initialDuration>-1</initialDuration>
+                                            <progressionFactor>1</progressionFactor>
+                                        </suspendOnFailure>
+                                        <markForSuspension>
+                                            <retriesBeforeSuspension>0</retriesBeforeSuspension>
+                                        </markForSuspension>
+                                    </http>
+                                </endpoint>
+                            </call>
+                            <filter regex="200" source="get-property('axis2', 'HTTP_SC')">
+                                <then>
+                                    <log level="custom">
+                                        <property name="switchlog" value="Call successful"/>
+                                    </log>
+                                    <respond/>
+                                </then>
+                                <else>
+                                    <log level="custom">
+                                        <property name="switchlog" value="Case: second call unsuccessful"/>
+                                    </log>
+                                    <property name="HTTP_SC" scope="axis2" type="STRING" value="500"/>
+                                    <payloadFactory media-type="json">
+                                        <format>
+										{
+										"error" : "Internal Business Service Error",
+										"errorProperty" :
+										{
+										"errorCode": "500",
+										"errorMessage": "",
+										"errorDetail": "Error after call External Microservice",
+										"errorException": ""
+										}
+										}										
+									</format>
+                                        <args/>
+                                    </payloadFactory>
+                                    <respond/>
+                                </else>
+                            </filter>
+                            <send/>
+                        </default>
+                    </switch>
+                </default>
+            </switch>
+        </inSequence>
+        <outSequence/>
+        <faultSequence>
+            <log level="custom">
+                <property expression="get-property('ERROR_CODE')" name="******ErrorCode******"/>
+            </log>
+            <log level="custom">
+                <property expression="get-property('ERROR_MESSAGE')" name="******ErrorMessage******"/>
+            </log>
+            <log level="custom">
+                <property expression="get-property('ERROR_DETAIL')" name="******ErrorDetail******"/>
+            </log>
+            <log level="custom">
+                <property expression="get-property('ERROR_EXCEPTION')" name="******ErrrorException******"/>
+            </log>
+            <payloadFactory media-type="json">
+                <format>
+						{
+							"error" : "Internal Business Service Error",
+							"errorProperty" :
+							{
+							"errorCode": $1,
+							"errorMessage": "$2",
+							"errorDetail": "$3",
+							"errorException": "$4"
+							}
+							}
+				</format>
+                <args>
+                    <arg evaluator="xml" expression="get-property('ERROR_CODE')"/>
+                    <arg evaluator="xml" expression="get-property('ERROR_MESSAGE')"/>
+                    <arg evaluator="xml" expression="get-property('ERROR_DETAIL')"/>
+                    <arg evaluator="xml" expression="get-property('ERROR_EXCEPTION')"/>
+                </args>
+            </payloadFactory>
+            <respond/>
+        </faultSequence>
+    </resource>
+    <resource methods="GET" uri-template="/GLOBAL_KPI/LTM/G">
+        <inSequence>
+            <log level="custom">
+                <property name="message" value="Business Service Way2Saidi GLOBAL_KPI/LTM/G"/>
+                <property name="********************** " value="http://internal-afa7d8031edd011ea907606218de8e2b-1018256878.eu-central-1.elb.amazonaws.com/kpi-management/indicators/GLOBAL_KPI/LTM/G"/>
+            </log>
+            <call>
+                <endpoint>
+                    <http method="get" uri-template="http://internal-afa7d8031edd011ea907606218de8e2b-1018256878.eu-central-1.elb.amazonaws.com/kpi-management/indicators/GLOBAL_KPI/LTM/G">
+                        <suspendOnFailure>
+                            <initialDuration>-1</initialDuration>
+                            <progressionFactor>1</progressionFactor>
+                        </suspendOnFailure>
+                        <markForSuspension>
+                            <retriesBeforeSuspension>0</retriesBeforeSuspension>
+                        </markForSuspension>
+                    </http>
+                </endpoint>
+            </call>
+            <filter regex="200" source="get-property('axis2', 'HTTP_SC')">
+                <then>
+                    <log level="custom">
+                        <property name="switchlog" value="Call successful"/>
+                    </log>
+                    <property expression="json-eval($.payload.data)" name="respData" scope="default" type="STRING"/>
+                    <script language="js"><![CDATA[//https://docs.wso2.com/display/ESB481/Script+Mediator
+			            							
+			            							var stringData = mc.getProperty("respData");
+			            							var jsonData = JSON.parse(stringData);
+			            							var log = mc.getServiceLog();
+			            							log.info ("Sono dentro JavaScript Mediator " + stringData);
+			            							
+			            							
+				            						var responseJson = jsonData.length; 
+			            							
+			            							
+			            							
+			            							mc.setProperty("responseJson", responseJson);
+			            							log.info ("***********" + " " + responseJson);]]></script>
+                    <payloadFactory media-type="json">
+                        <format>
+			
+								{
+								"response" : $1}
+			
+							</format>
+                        <args>
+                            <arg evaluator="xml" expression="get-property('responseJson')"/>
+                        </args>
+                    </payloadFactory>
+                    <property name="messageType" scope="axis2" type="STRING" value="application/json"/>
+                    <respond/>
+                </then>
+                <else>
+                    <log level="custom">
+                        <property name="switchlog" value="Case: second call unsuccessful"/>
+                    </log>
+                    <property name="HTTP_SC" scope="axis2" type="STRING" value="500"/>
+                    <payloadFactory media-type="json">
+                        <format>
+							{
+							"error" : "Internal Business Service Error",
+							"errorProperty" :
+							{
+							"errorCode": "500",
+							"errorMessage": "",
+							"errorDetail": "Error after call External Microservice",
+							"errorException": ""
+							}
+							}
+						</format>
+                        <args/>
+                    </payloadFactory>
+                    <respond/>
+                </else>
+            </filter>
+        </inSequence>
+        <outSequence/>
+        <faultSequence>
+            <log level="custom">
+                <property expression="get-property('ERROR_CODE')" name="******ErrorCode******"/>
+            </log>
+            <log level="custom">
+                <property expression="get-property('ERROR_MESSAGE')" name="******ErrorMessage******"/>
+            </log>
+            <log level="custom">
+                <property expression="get-property('ERROR_DETAIL')" name="******ErrorDetail******"/>
+            </log>
+            <log level="custom">
+                <property expression="get-property('ERROR_EXCEPTION')" name="******ErrrorException******"/>
+            </log>
+            <payloadFactory media-type="json">
+                <format>
+					{
+					"error" : "Internal Business Service Error",
+					"errorProperty" :
+					{
+					"errorCode": $1,
+					"errorMessage": "$2",
+					"errorDetail": "$3",
+					"errorException": "$4"
+					}
+					}
+				</format>
+                <args>
+                    <arg evaluator="xml" expression="get-property('ERROR_CODE')"/>
+                    <arg evaluator="xml" expression="get-property('ERROR_MESSAGE')"/>
+                    <arg evaluator="xml" expression="get-property('ERROR_DETAIL')"/>
+                    <arg evaluator="xml" expression="get-property('ERROR_EXCEPTION')"/>
+                </args>
+            </payloadFactory>
+            <respond/>
+        </faultSequence>
+    </resource>
+</api>

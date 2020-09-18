@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?><artifacts>
+    <artifact name="concat" groupId="com.example.WayToSaidiTest.api" version="1.0.0" type="synapse/api" serverRole="EnterpriseServiceBus">
+        <file>src/main/synapse-config/api/concat.xml</file>
+    </artifact>
+    <artifact name="indicators" groupId="com.example.WayToSaidiTest.api" version="1.0.0" type="synapse/api" serverRole="EnterpriseServiceBus">
+        <file>src/main/synapse-config/api/indicators.xml</file>
+    </artifact>
+</artifacts>
